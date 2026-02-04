@@ -31,17 +31,13 @@ sudo apt install -y curl jq nano build-essential git make wget
 
 ## Step 2: Install Republicd Binary
 
----
-# Download the latest validator binary v0.2.0
-```bash
-VERSION="v0.2.0"
-curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
+Download the latest version (v0.1.0):
 
+```bash
+VERSION="v0.1.0"
+curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
 chmod +x /tmp/republicd
 sudo mv /tmp/republicd /usr/local/bin/republicd
-
-# Verify version
-republicd version  # Should show v0.2.0
 ```
 
 Verify:
@@ -137,60 +133,6 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
-
-## Step 7A: Fix the TWO mempool lines (Most Important)
-
-This step is **mandatory**.
-If skipped, the node **will not start**.
-
----
-
-### Open the config file
-
-```bash
-nano $HOME/.republicd/config/config.toml
-```
-
----
-
-### Find the following lines
-
-(Press **Ctrl + W** and search one by one)
-
-```toml
-experimental_max_gossip_connections_to_persistent_peers =
-experimental_max_gossip_connections_to_non_persistent_peers =
-```
-
----
-
-### Replace them **exactly** with
-
-```toml
-experimental_max_gossip_connections_to_persistent_peers = 4
-experimental_max_gossip_connections_to_non_persistent_peers = 4
-```
-
----
-
-### Save and exit
-
-* Press `Ctrl + O` → Enter
-* Press `Ctrl + X`
-
----
-
-### Open Screen
-
-```bash
-screen -S new
-```
-
-
-### Restart the node
-
----
-
 Enable and start:
 
 ```bash
@@ -199,21 +141,11 @@ sudo systemctl enable republicd
 sudo systemctl start republicd
 ```
 
----
-
-### Verify
-
-```bash
-republicd status --home $HOME/.republicd | jq '.sync_info'
-```
-<img width="899" height="238" alt="image" src="https://github.com/user-attachments/assets/62c602a6-d3cd-4e86-a9cc-ddb84353743f" />
-
 Check logs:
 
 ```bash
 journalctl -u republicd -f
 ```
-<img width="1893" height="787" alt="image" src="https://github.com/user-attachments/assets/62023a2f-4a85-4bab-b407-6aa9f3854ccd" />
 
 ---
 
@@ -226,6 +158,7 @@ republicd status | jq '.sync_info'
 ```
 
 Wait until `"catching_up": false`.
+<img width="1898" height="264" alt="image" src="https://github.com/user-attachments/assets/c40a5788-5718-495f-869f-318a88dbbc29" />
 
 ---
 
@@ -238,12 +171,16 @@ republicd keys add xyzguide  # New wallet - save the mnemonic securely!
 # OR import existing
 republicd keys add xyzguide --recover
 ```
+<img width="578" height="64" alt="image" src="https://github.com/user-attachments/assets/cf2bab05-854d-4bc2-b70f-6529976fd9a2" />
 
 Check your address:
 
 ```bash
 republicd keys show xyzguide -a  # e.g., rai1xcr42hlh85kutaqtmyxw2zu8pr3nk5rks6nlp5
 ```
+<img width="604" height="88" alt="image" src="https://github.com/user-attachments/assets/ef30aa7a-4812-4d38-b95b-a35e547efb34" />
+
+
 Replace `xyzguide` with your moniker.
 
 ---
@@ -320,6 +257,7 @@ Get operator address:
 republicd keys show xyzguide --bech val -a  # e.g., raivaloper1xcr42hlh85kutaqtmyxw2zu8pr3nk5rkh0nz2z
 ```
 Replace `xyzguide` with your moniker.
+<img width="1476" height="77" alt="image" src="https://github.com/user-attachments/assets/b5056ac0-bf67-41d4-83a3-e7cb50ff498a" />
 
 Check status:
 
