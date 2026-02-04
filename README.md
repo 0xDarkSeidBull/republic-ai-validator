@@ -1,6 +1,6 @@
 # Republic AI Testnet Validator Setup Guide
 
-This is a comprehensive, updated guide for setting up a validator node on the Republic AI testnet (`raitestnet_77701-1`). This guide corrects outdated commands from older versions (e.g., Cosmos SDK changes) and includes all steps based on successful setups. It's designed to be hosted on GitHub as a README.md file in a new repository.
+<img width="1710" height="652" alt="image" src="https://github.com/user-attachments/assets/3a0dc4b0-f9f1-45aa-b4ef-865632dc8ffe" />
 
 
 ## 📌 Important Notes (Read First)
@@ -318,3 +318,20 @@ Replace `xyzguide` with your moniker.
 
 ---
 
+## 👤 Author
+
+* **Handle:** 0xDarkSeidBull
+* **Role:** Republic Validator
+* **GitHub:** [https://github.com/0xDarkSeidBull](https://github.com/0xDarkSeidBull)
+* **Wallet:** `0x3bc6348e1e569e97bd8247b093475a4ac22b9fd4`
+
+
+  ## If this guide helped you:
+
+⭐ [![Stars](https://img.shields.io/github/stars/0xDarkSeidBull/republic-ai-validator)](https://github.com/0xDarkSeidBull/g0xDarkSeidBull/republic-ai-validator/stargazers)
+
+🧾 [![License](https://img.shields.io/github/license/0xDarkSeidBull/republic-ai-validator)](LICENSE)
+
+🔁 Share with new builders
+
+---
