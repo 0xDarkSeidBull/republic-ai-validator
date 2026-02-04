@@ -10,4 +10,4 @@ Run a Republic AI testnet validator using **one command**.
 
 ## One-Line Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/republic-ai-validator/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/0xDarkSeidBull/republic-ai-validator/main/install.sh | bash
