@@ -1,88 +1,78 @@
-# 🟢 Republic AI Testnet – Validator Setup Guide
+# Republic AI Testnet Validator Setup Guide
 
+This is a comprehensive, updated guide for setting up a validator node on the Republic AI testnet (`raitestnet_77701-1`). This guide corrects outdated commands from older versions (e.g., Cosmos SDK changes) and includes all steps based on successful setups. It's designed to be hosted on GitHub as a README.md file in a new repository.
 
----
+If you're creating a GitHub repo for this guide, follow the "GitHub Repo Setup" section at the end.
 
-## 📌 IMPORTANT NOTE (READ FIRST)
+## 📌 Important Notes (Read First)
 
-> **`<your-moniker>` = your username / validator name**
->
-> Examples:
->
-> * GitHub username: `alice` → moniker = `alice`
-> * Discord name: `gurupedia` → moniker = `gurupedia`
->
-> ⚠️ Do **NOT** use spaces.
-> ✔️ Use lowercase letters, numbers, or `-`.
+- **Moniker**: Your validator name (e.g., `xyzguide`). Use lowercase letters, numbers, or `-` only — no spaces.
+- **Chain ID**: `raitestnet_77701-1`
+- **Denom**: `arai` (base unit), `RAI` (human-readable)
+- **Decimals**: 18 (e.g., 1 RAI = 1000000000000000000 arai)
+- **Min Gas Price**: `250000000arai`
+- **Minimum Self-Delegation**: 1 RAI (1000000000000000000 arai) — but the original guide suggests 1000 RAI for better voting power.
+- **Testnet Tokens**: Get from faucet (https://points.republicai.io/faucet) or Discord (#faucet channel). You need at least 1.1–2 RAI for min delegation + fees (more for higher delegation).
+- **System Requirements**: Ubuntu 22.04 LTS, 4+ CPU cores (8 recommended), 16GB+ RAM, 500GB+ SSD.
 
----
-
-## 🌐 Network Information
-
-* **Chain ID:** `raitestnet_77701-1`
-* **Denom:** `arai` (base), `RAI`
-* **Decimals:** 18
-* **Min Gas Price:** `250000000arai`
+This guide uses **state sync** for faster syncing (recommended).
 
 ---
 
-## 🖥️ System Requirements
+## Step 1: Install Dependencies
 
-* Ubuntu 22.04 LTS
-* 4+ CPU cores (8 recommended for validators)
-* 16GB+ RAM
-* 500GB+ SSD
-
-
----
-
-# 🔹 GUIDE 1: Manual Node Installation (Recommended)
-
-This method is best for **advanced users** and **long-term validators**.
-
----
-
-## 0️⃣ Install dependencies:
+Update your system and install required packages:
 
 ```bash
-sudo apt update && sudo apt install -y curl jq
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl jq nano build-essential git make wget
 ```
 
-## 1️⃣ Install `republicd`
+---
+
+## Step 2: Install Republicd Binary
+
+Download the latest version (v0.1.0):
 
 ```bash
 VERSION="v0.1.0"
-curl -L https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64 -o /tmp/republicd
+curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
 chmod +x /tmp/republicd
 sudo mv /tmp/republicd /usr/local/bin/republicd
 ```
 
+Verify:
+
+```bash
+republicd version  # Should show v0.1.0
+```
+
 ---
 
-## 2️⃣ Initialize Node
+## Step 3: Initialize Node
+
+Set your home directory and initialize:
 
 ```bash
 REPUBLIC_HOME="$HOME/.republicd"
-republicd init <your-moniker> \
-  --chain-id raitestnet_77701-1 \
-  --home "$REPUBLIC_HOME"
+republicd init xyzguide --chain-id raitestnet_77701-1 --home "$REPUBLIC_HOME"
 ```
 
-📌 **Note:**
-`<your-moniker>` = your username / validator name
+Replace `xyzguide` with your moniker.
 
 ---
 
-## 3️⃣ Download Genesis
+## Step 4: Download Genesis File
 
 ```bash
-curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
-> "$REPUBLIC_HOME/config/genesis.json"
+curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json > "$REPUBLIC_HOME/config/genesis.json"
 ```
 
 ---
 
-## 4️⃣ Configure State Sync (Fast Sync – Recommended)
+## Step 5: Configure State Sync (Fast Sync – Recommended)
+
+Get the latest sync parameters:
 
 ```bash
 SNAP_RPC="https://statesync.republicai.io"
@@ -91,6 +81,8 @@ LATEST_HEIGHT=$(curl -s $SNAP_RPC/block | jq -r .result.block.header.height)
 BLOCK_HEIGHT=$((LATEST_HEIGHT - 1000))
 TRUST_HASH=$(curl -s "$SNAP_RPC/block?height=$BLOCK_HEIGHT" | jq -r .result.block_id.hash)
 ```
+
+Update config.toml:
 
 ```bash
 sed -i -E "s|enable *=.*|enable = true|; \
@@ -102,12 +94,10 @@ s|trust_hash *=.*|trust_hash = \"$TRUST_HASH\"|" \
 
 ---
 
-## 5️⃣ Add Persistent Peers
+## Step 6: Add Persistent Peers
 
 ```bash
-PEERS="e281dc6e4ebf5e32fb7e6c4a111c06f02a1d4d62@3.92.139.74:26656,\
-cfb2cb90a241f7e1c076a43954f0ee6d42794d04@54.173.6.183:26656,\
-dc254b98cebd6383ed8cf2e766557e3d240100a9@54.227.57.160:26656"
+PEERS="e281dc6e4ebf5e32fb7e6c4a111c06f02a1d4d62@3.92.139.74:26656,cfb2cb90a241f7e1c076a43954f0ee6d42794d04@54.173.6.183:26656,dc254b98cebd6383ed8cf2e766557e3d240100a9@54.227.57.160:26656"
 
 sed -i -E "s|persistent_peers *=.*|persistent_peers = \"$PEERS\"|" \
 "$REPUBLIC_HOME/config/config.toml"
@@ -115,23 +105,19 @@ sed -i -E "s|persistent_peers *=.*|persistent_peers = \"$PEERS\"|" \
 
 ---
 
-## 6️⃣ 🔁 Systemd Service (DO THIS BEFORE VALIDATOR)
+## Step 7: Set Up Systemd Service (for Auto-Restart)
 
-> ⚠️ **This step MUST be done before validator creation**
-
----
-
-### Create Service File
+Create the service file:
 
 ```bash
 sudo nano /etc/systemd/system/republicd.service
 ```
 
-Paste below (replace `ubuntu` if needed):
+Paste this (replace `ubuntu` with your actual user if different):
 
 ```ini
 [Unit]
-Description=Republic Protocol Node
+Description=Republic AI Testnet Node
 After=network-online.target
 
 [Service]
@@ -148,20 +134,15 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
----
-
-### Enable & Start Service
+Enable and start:
 
 ```bash
-sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
 sudo systemctl enable republicd
 sudo systemctl start republicd
 ```
 
----
-
-### Check Logs
+Check logs:
 
 ```bash
 journalctl -u republicd -f
@@ -169,200 +150,166 @@ journalctl -u republicd -f
 
 ---
 
-## 7️⃣ Wait for Full Sync
+## Step 8: Wait for Full Sync
+
+Monitor sync status:
 
 ```bash
 republicd status | jq '.sync_info'
 ```
 
-✅ Required:
+Wait until `"catching_up": false`.
+
+---
+
+## Step 9: Create Wallet
+
+Add a new wallet or import one:
+
+```bash
+republicd keys add xyzguide  # New wallet - save the mnemonic securely!
+# OR import existing
+republicd keys add xyzguide --recover
+```
+
+Check your address:
+
+```bash
+republicd keys show xyzguide -a  # e.g., rai1xcr42hlh85kutaqtmyxw2zu8pr3nk5rks6nlp5
+```
+Replace `xyzguide` with your moniker.
+
+---
+
+## Step 10: Get Testnet Tokens
+
+- Use the faucet: https://points.republicai.io/faucet (log in with X/Discord/wallet)
+
+
+Check balance:
+
+```bash
+republicd query bank balances $(republicd keys show xyzguide -a)
+```
+
+Wait until you have at least 1.1+ RAI.
+
+---
+
+## Step 11: Create Validator
+
+Get pubkey:
+
+```bash
+republicd comet show-validator
+```
+
+Create `validator.json`:
+
+```bash
+nano validator.json
+```
+
+Paste (replace `"key"` with your pubkey output):
 
 ```json
-"catching_up": false
+{
+  "pubkey": {"@type":"/cosmos.crypto.ed25519.PubKey","key":"if+Eqq9Fa4pAEB9TZO2peb8b9QpbC9Poq0Z/iifJ/Ok="},
+  "amount": "1000000000000000000arai",
+  "moniker": "xyzguide",
+  "identity": "",
+  "website": "",
+  "security_contact": "",
+  "details": "Republic AI testnet validator - xyzguide",
+  "commission-rate": "0.10",
+  "commission-max-rate": "0.20",
+  "commission-max-change-rate": "0.01",
+  "min-self-delegation": "1"
+}
 ```
+Replace `xyzguide` with your moniker.
 
----
-
-## 8️⃣ Create Wallet
+Send transaction:
 
 ```bash
-republicd keys add <your-moniker>
-```
-
-📌 **Note:**
-`<your-moniker>` = your username / validator name
-
----
-
-## 9️⃣ Create Validator (Activation Step)
-
-```bash
-republicd tx staking create-validator \
-  --amount=1000000000000000000000arai \
-  --pubkey=$(republicd comet show-validator) \
-  --moniker="<your-moniker>" \
-  --chain-id=raitestnet_77701-1 \
-  --commission-rate="0.10" \
-  --commission-max-rate="0.20" \
-  --commission-max-change-rate="0.01" \
-  --min-self-delegation="1" \
-  --gas=auto \
-  --gas-adjustment=1.5 \
-  --gas-prices="250000000arai" \
-  --from=<your-moniker>
-```
-
-📌 **Note:**
-`<your-moniker>` = your username / validator name
-
-🎉 **Validator is now ACTIVE once bonded**
-
----
-
-# 🛠️ Useful Commands (Manual Guide)
-
----
-
-## 🔍 Check Sync Status
-
-```bash
-republicd status | jq '.sync_info'
-```
-
----
-
-## 👤 Validator Info
-
-```bash
-republicd query staking validator \
-$(republicd keys show <your-moniker> --bech val -a)
-```
-
-📌 **Note:**
-`<your-moniker>` = your username / validator name
-
----
-
-## 🔓 Unjail Validator
-
-```bash
-republicd tx slashing unjail \
-  --from <your-moniker> \
+republicd tx staking create-validator validator.json \
+  --from xyzguide \
   --chain-id raitestnet_77701-1 \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 250000000arai
+  --gas-prices 1000000000arai \
+  --yes
 ```
 
-📌 **Note:**
-`<your-moniker>` = your username / validator name
+Adjust `--gas-prices` if fee error occurs (e.g., 1500000000arai).
 
 ---
 
-## 🤝 Delegate Tokens
+## Step 12: Verify Validator
+
+Get operator address:
 
 ```bash
-republicd tx staking delegate \
-<validator-address> <amount>arai \
---from <your-moniker> \
---chain-id raitestnet_77701-1 \
---gas auto \
---gas-adjustment 1.5 \
---gas-prices 250000000arai
+republicd keys show xyzguide --bech val -a  # e.g., raivaloper1xcr42hlh85kutaqtmyxw2zu8pr3nk5rkh0nz2z
 ```
+Replace `xyzguide` with your moniker.
 
-📌 **Note:**
-`<your-moniker>` = your username / validator name
-
----
-
-# ⚡ GUIDE 2: Single-Command Installation (Fastest)
-
----
-
-## 📌 Note (Important)
-
-**`your moniker = your username`**
-This will be your **public validator name**.
-
----
-
-## 🖥️ Requirements
-
-* Ubuntu 22.04
-* 4+ CPU, 16GB RAM, 500GB SSD
-
----
-
-## ▶️ Step 1: Run the Command
-
-Paste this in your terminal:
+Check status:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/0xDarkSeidBull/republic-ai-validator/main/install.sh | bash
+republicd query staking validator $(republicd keys show xyzguide --bech val -a)
 ```
 
----
+- Status: `BOND_STATUS_BONDED`
+- Jailed: `false`
 
-## ▶️ Step 2: Enter Your Username
-
-When asked:
-
-```
-Enter your moniker:
-```
-
-👉 Type **your username** and press **Enter**
+Check the explorer: https://explorer.republicai.io (search for the operator address).
 
 ---
 
-## ▶️ Step 3: Save Wallet Details
+## Step 13: Link Validator on Dashboard DO NOT USE IT NOW I NEED TO MAKE UPDATE
 
-* Set a password
-* Save the recovery phrase safely
+On https://points.republicai.io or similar:
 
----
+- Use Option 2: Transaction Verification
+- Send small tx with memo (your username/referral):
 
-## ▶️ Step 4: Get Faucet Tokens
-
-* Request testnet tokens from the Republic AI faucet
-* Wait until tokens arrive
-
----
-
-## ▶️ Step 5: Press ENTER
-
-After receiving tokens, go back to terminal and press **ENTER**
-
----
-
-## ▶️ Step 6: Validator Created 🎉
-
-* Validator transaction is sent
-* After bonding, your validator becomes **ACTIVE**
-
----
-
-## 🔁 Recommended (After Setup)
-
-Set up **systemd service** so your node:
-
-* Auto-restarts
-* Runs after reboot
-
----
-
-## ✅ Summary
-
-```text
-Run command
-→ Enter username
-→ Save wallet
-→ Get tokens
-→ Press ENTER
-→ Validator ACTIVE
+```bash
+republicd tx bank send \
+  xyzguide \
+  $(republicd keys show xyzguide -a) \
+  1000000000000000arai \
+  --chain-id raitestnet_77701-1 \
+  --from xyzguide \
+  --note "cryptobhartiyax" \
+  --gas auto \
+  --gas-adjustment 1.5 \
+  --gas-prices 1000000000arai \
+  --yes
 ```
 
+- Copy txhash from output
+- Paste on website and submit
+
 ---
 
+## Useful Commands
+
+- Sync status: `republicd status | jq '.sync_info'`
+- Validator info: `republicd query staking validator [operator_addr]`
+- Unjail: `republicd tx slashing unjail --from xyzguide --chain-id raitestnet_77701-1 --gas auto --gas-adjustment 1.5 --gas-prices 1000000000arai --yes`
+- Delegate more: `republicd tx staking delegate [operator_addr] 1000000000000000000arai --from xyzguide --chain-id raitestnet_77701-1 --gas auto --gas-adjustment 1.5 --gas-prices 1000000000arai --yes`
+
+Replace `xyzguide` with your moniker.
+
+---
+
+## Troubleshooting
+
+- **Sequence mismatch**: Add `--sequence 1` to txs if first tx.
+- **Insufficient fee**: Increase `--gas-prices` to 1500000000arai or higher.
+- **Sync stuck**: Restart service (`sudo systemctl restart republicd`).
+- **Not enough tokens**: Ask in Discord for more.
+
+---
 
