@@ -31,13 +31,17 @@ sudo apt install -y curl jq nano build-essential git make wget
 
 ## Step 2: Install Republicd Binary
 
-Download the latest version (v0.1.0):
-
+---
+# Download the latest validator binary v0.2.0
 ```bash
-VERSION="v0.1.0"
-curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
+VERSION="v0.2.0"
+curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
+
 chmod +x /tmp/republicd
 sudo mv /tmp/republicd /usr/local/bin/republicd
+
+# Verify version
+republicd version  # Should show v0.2.0
 ```
 
 Verify:
@@ -133,6 +137,60 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
+
+## Step 7A: Fix the TWO mempool lines (Most Important)
+
+This step is **mandatory**.
+If skipped, the node **will not start**.
+
+---
+
+### Open the config file
+
+```bash
+nano $HOME/.republicd/config/config.toml
+```
+
+---
+
+### Find the following lines
+
+(Press **Ctrl + W** and search one by one)
+
+```toml
+experimental_max_gossip_connections_to_persistent_peers =
+experimental_max_gossip_connections_to_non_persistent_peers =
+```
+
+---
+
+### Replace them **exactly** with
+
+```toml
+experimental_max_gossip_connections_to_persistent_peers = 4
+experimental_max_gossip_connections_to_non_persistent_peers = 4
+```
+
+---
+
+### Save and exit
+
+* Press `Ctrl + O` → Enter
+* Press `Ctrl + X`
+
+---
+
+### Open Screen
+
+```bash
+screen -S new
+```
+
+
+### Restart the node
+
+---
+
 Enable and start:
 
 ```bash
@@ -141,11 +199,21 @@ sudo systemctl enable republicd
 sudo systemctl start republicd
 ```
 
+---
+
+### Verify
+
+```bash
+republicd status --home $HOME/.republicd | jq '.sync_info'
+```
+<img width="899" height="238" alt="image" src="https://github.com/user-attachments/assets/62c602a6-d3cd-4e86-a9cc-ddb84353743f" />
+
 Check logs:
 
 ```bash
 journalctl -u republicd -f
 ```
+<img width="1893" height="787" alt="image" src="https://github.com/user-attachments/assets/62023a2f-4a85-4bab-b407-6aa9f3854ccd" />
 
 ---
 
