@@ -2,7 +2,6 @@
 
 This is a comprehensive, updated guide for setting up a validator node on the Republic AI testnet (`raitestnet_77701-1`). This guide corrects outdated commands from older versions (e.g., Cosmos SDK changes) and includes all steps based on successful setups. It's designed to be hosted on GitHub as a README.md file in a new repository.
 
-If you're creating a GitHub repo for this guide, follow the "GitHub Repo Setup" section at the end.
 
 ## 📌 Important Notes (Read First)
 
@@ -11,8 +10,8 @@ If you're creating a GitHub repo for this guide, follow the "GitHub Repo Setup" 
 - **Denom**: `arai` (base unit), `RAI` (human-readable)
 - **Decimals**: 18 (e.g., 1 RAI = 1000000000000000000 arai)
 - **Min Gas Price**: `250000000arai`
-- **Minimum Self-Delegation**: 1 RAI (1000000000000000000 arai) — but the original guide suggests 1000 RAI for better voting power.
-- **Testnet Tokens**: Get from faucet (https://points.republicai.io/faucet) or Discord (#faucet channel). You need at least 1.1–2 RAI for min delegation + fees (more for higher delegation).
+- **Minimum Self-Delegation**: 1 RAI (1000000000000000000 arai) .
+- **Testnet Tokens**: Get from faucet (https://points.republicai.io/faucet) or Discord MOD . You need at least 1.1–2 RAI for min delegation + fees (more for higher delegation), but need at least 1k RAI for being in top 100.
 - **System Requirements**: Ubuntu 22.04 LTS, 4+ CPU cores (8 recommended), 16GB+ RAM, 500GB+ SSD.
 
 This guide uses **state sync** for faster syncing (recommended).
@@ -267,9 +266,9 @@ Check the explorer: https://explorer.republicai.io (search for the operator addr
 
 ---
 
-## Step 13: Link Validator on Dashboard DO NOT USE IT NOW I NEED TO MAKE UPDATE
+## Step 13: Link Validator on Dashboard 
 
-On https://points.republicai.io or similar:
+On https://points.republicai.io :
 
 - Use Option 2: Transaction Verification
 - Send small tx with memo (your username/referral):
@@ -281,12 +280,18 @@ republicd tx bank send \
   1000000000000000arai \
   --chain-id raitestnet_77701-1 \
   --from xyzguide \
-  --note "cryptobhartiyax" \
+  --note "xyz" \
   --gas auto \
   --gas-adjustment 1.5 \
   --gas-prices 1000000000arai \
   --yes
 ```
+Replace `xyzguide` with your moniker.
+
+change xyz Your username: zoroxeth or @zoroxeth
+Your referral code or full URL: 9F674A : 
+Below is the example: 
+<img width="648" height="243" alt="image" src="https://github.com/user-attachments/assets/44fb3200-4c2a-4711-9363-d07d542ae395" />
 
 - Copy txhash from output
 - Paste on website and submit
