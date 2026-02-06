@@ -40,12 +40,6 @@ chmod +x /tmp/republicd
 sudo mv /tmp/republicd /usr/local/bin/republicd
 ```
 
-Verify:
-
-```bash
-republicd version  # Should show v0.1.0
-```
-
 ---
 
 ## Step 3: Initialize Node
