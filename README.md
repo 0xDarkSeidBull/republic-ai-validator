@@ -133,6 +133,58 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
+---
+
+## Step 7A: Fix the TWO Mempool Lines (**Most Important**)
+
+> ⚠️ **This step is mandatory.**
+> If skipped, the node **will not start**.
+
+---
+
+### 📂 Open the config file
+
+```bash
+nano $HOME/.republicd/config/config.toml
+```
+
+---
+
+### 🔍 Find the following lines
+
+(Press **Ctrl + W** and search **one by one**)
+
+```toml
+experimental_max_gossip_connections_to_persistent_peers =
+experimental_max_gossip_connections_to_non_persistent_peers =
+```
+
+---
+
+### ✏️ Replace them **exactly** with:
+
+```toml
+experimental_max_gossip_connections_to_persistent_peers = 4
+experimental_max_gossip_connections_to_non_persistent_peers = 4
+```
+
+---
+
+### 💾 Save & Exit
+
+* Press **Ctrl + O** → **Enter** (Save)
+* Press **Ctrl + X** (Exit)
+
+---
+
+### 🖥️ Open a new screen session
+
+```bash
+screen -S new
+```
+
+---
+
 Enable and start:
 
 ```bash
