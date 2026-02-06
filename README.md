@@ -61,6 +61,39 @@ Replace `xyzguide` with your moniker.
 
 ---
 
+## Step 3.1: Create Missing Validator State File (MANDATORY)
+
+### 2️⃣ Create missing directory
+
+```bash
+mkdir -p /root/.republicd/data
+```
+
+---
+
+### 3️⃣ Create the missing state file (IMPORTANT)
+
+```bash
+cat <<EOF > /root/.republicd/data/priv_validator_state.json
+{
+  "height": "0",
+  "round": 0,
+  "step": 0
+}
+EOF
+```
+
+---
+
+### 4️⃣ Fix ownership (just to be safe)
+
+```bash
+chown -R root:root /root/.republicd
+```
+
+---
+
+
 ## Step 4: Download Genesis File
 
 ```bash
