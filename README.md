@@ -1,4 +1,4 @@
-[# Republic AI Testnet Validator Setup Guide
+## Republic AI Testnet Validator Setup Guide
 
 <img width="1710" height="652" alt="image" src="https://github.com/user-attachments/assets/3a0dc4b0-f9f1-45aa-b4ef-865632dc8ffe" />
 
