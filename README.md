@@ -103,38 +103,6 @@ sed -i -E "s|persistent_peers *=.*|persistent_peers = \"$PEERS\"|" \
 ```
 
 ---
-
-## Step 7: Set Up Systemd Service (for Auto-Restart)
-
-Create the service file:
-
-```bash
-sudo nano /etc/systemd/system/republicd.service
-```
-
-Paste this (replace `ubuntu` with your actual user if different):
-
-```ini
-[Unit]
-Description=Republic AI Testnet Node
-After=network-online.target
-
-[Service]
-User=ubuntu
-WorkingDirectory=/home/ubuntu
-ExecStart=/usr/local/bin/republicd start \
-  --home /home/ubuntu/.republicd \
-  --chain-id raitestnet_77701-1
-Restart=always
-RestartSec=3
-LimitNOFILE=65535
-
-[Install]
-WantedBy=multi-user.target
-```
-
----
-
 ## Step 7A: Fix the TWO Mempool Lines (**Most Important**)
 
 > ⚠️ **This step is mandatory.**
@@ -174,6 +142,34 @@ experimental_max_gossip_connections_to_non_persistent_peers = 4
 
 * Press **Ctrl + O** → **Enter** (Save)
 * Press **Ctrl + X** (Exit)
+
+---
+
+## Step 7: Set Up Systemd Service (for Auto-Restart)
+
+Create the service file:
+
+```bash
+sudo nano /etc/systemd/system/republicd.service
+```
+
+Paste this (replace `ubuntu` with your actual user if different):
+
+```ini
+[Unit]
+Description=Republic AI Testnet Node
+After=network-online.target
+
+[Service]
+Environment=HOME=/root
+WorkingDirectory=/root
+ExecStart=/usr/local/bin/republicd start \
+  --home /root/.republicd \
+  --chain-id raitestnet_77701-1
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+```
 
 ---
 
