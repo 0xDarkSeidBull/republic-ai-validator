@@ -347,7 +347,7 @@ republicd tx bank send \
   --note "YOUR_REFER_CODE" \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 100000000arai \
+  --gas-prices 250000000arai \
   --yes
 ```
 
