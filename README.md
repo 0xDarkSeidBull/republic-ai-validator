@@ -425,7 +425,7 @@ republicd tx bank send \
   1000000000000000arai \
   --chain-id raitestnet_77701-1 \
   --from xyzguide \
-  --note "zoroxeth | 9F674A" \
+  --note "YOUR_REFER_CODE" \
   --gas auto \
   --gas-adjustment 1.5 \
   --gas-prices 1000000000arai \
@@ -465,14 +465,7 @@ republicd tx slashing unjail \
 
 ---
 
-## ✅ Final Verdict
 
-✔ No state sync loops
-✔ No RPC crashes
-✔ No silent exits
-✔ Fully stable validator setup
-
-> **Slow sync is better than a broken fast sync**
 
 
 
