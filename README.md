@@ -116,7 +116,9 @@ This section explains **exactly how to calculate the trust height and trust hash
 ---
 Find BLOCK
 
-```SNAP_RPC="https://rpc.republicai.io"```
+```
+SNAP_RPC="https://rpc.republicai.io"
+```
 
 ### Example Context
 
