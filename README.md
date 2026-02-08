@@ -52,8 +52,8 @@ sudo apt install -y curl jq nano build-essential git make wget screen
 ## Step 2: Install `republicd` Binary
 
 ```bash
-VERSION="v0.2.1"
-curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
+VERSION="v0.1.0"
+curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
 chmod +x /tmp/republicd
 sudo mv /tmp/republicd /usr/local/bin/republicd
 ```
