@@ -1,5 +1,7 @@
 # 🚀 Republic AI Testnet Validator Setup Guide
 
+---
+
 ## ⚠️ IMPORTANT — READ FIRST
 
 ### 🔴 RULE #1: RUN EVERYTHING AS ROOT
@@ -29,6 +31,19 @@ If you do not run as root, you will face permission errors, systemd failures, or
 
 ---
 
+## 📝 IMPORTANT NOTE ABOUT MONIKER
+
+> **NOTE:**
+> Wherever `xyzguide` is used in this guide, **replace it with your own moniker / key name**.
+> Use the **same moniker consistently** for:
+>
+> * node initialization
+> * wallet keys
+> * validator creation
+> * transactions
+
+---
+
 ## 📌 Network & System Information
 
 | Item                    | Value                        |
@@ -42,9 +57,6 @@ If you do not run as root, you will face permission errors, systemd failures, or
 | Top 100 Validators      | ~1000+ RAI                   |
 | Operating System        | Ubuntu 22.04 LTS             |
 | Recommended Hardware    | 8 CPU / 16GB RAM / 500GB SSD |
-
-> **Moniker rule:**
-> Replace `xyzguide` everywhere with your own validator moniker.
 
 ---
 
@@ -277,7 +289,23 @@ Minimum required: **1.1+ RAI**
 
 ---
 
-## Step 15: Create Validator
+## Step 15: Create Validator (IMPORTANT CHECK)
+
+### 🔍 Check sync status before creating validator
+
+```bash
+republicd status | jq .sync_info.catching_up
+```
+
+✔ Output **must be**:
+
+```json
+false
+```
+
+⚠️ If it shows `true`, **wait until full sync is completed**.
+
+---
 
 Get validator public key:
 
@@ -319,7 +347,7 @@ republicd tx bank send \
   --note "YOUR_REFER_CODE" \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 1000000000arai \
+  --gas-prices 100000000arai \
   --yes
 ```
 
@@ -336,22 +364,50 @@ republicd tx bank send \
 republicd status | jq .sync_info
 ```
 
+---
+
+### Check Validator Status
+
+```bash
+republicd query staking validator $(republicd keys show <your-moniker> --bech val -a)
+```
+
+---
+
+### Unjail Validator
+
+```bash
+republicd tx slashing unjail \
+  --from <your-moniker> \
+  --chain-id raitestnet_77701-1 \
+  --gas auto \
+  --gas-adjustment 1.5 \
+  --gas-prices 250000000arai \
+  --yes
+```
+
+---
+
+### Delegate Tokens
+
+```bash
+republicd tx staking delegate \
+  <validator-address> \
+  <amount>arai \
+  --from <your-moniker> \
+  --chain-id raitestnet_77701-1 \
+  --gas auto \
+  --gas-adjustment 1.5 \
+  --gas-prices 250000000arai \
+  --yes
+```
+
+---
+
 ### Restart Node
 
 ```bash
 systemctl restart republicd
-```
-
-### Unjail Validator (If Needed)
-
-```bash
-republicd tx slashing unjail \
-  --from xyzguide \
-  --chain-id raitestnet_77701-1 \
-  --gas auto \
-  --gas-adjustment 1.5 \
-  --gas-prices 1000000000arai \
-  --yes
 ```
 
 ---
@@ -363,5 +419,4 @@ republicd tx slashing unjail \
 * Keep sufficient balance for gas fees
 
 
-
-Just tell me.
+just tell me.
