@@ -259,7 +259,7 @@ systemctl start republicd
 ## Step 12: Wait for Full Sync
 
 ```bash
-republicd status | jq .sync_info
+republicd status | jq '.sync_info'
 ```
 
 Proceed only when:
