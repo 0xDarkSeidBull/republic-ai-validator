@@ -335,6 +335,7 @@ republicd tx bank send \
   --gas-prices 250000000arai \
   --yes
 ```
+Submit TX hash on: [https://points.republicai.io](https://points.republicai.io)
 
 
 ## 👤 Author
@@ -354,7 +355,6 @@ republicd tx bank send \
 
 🔁 Share with new builders
 
-Submit TX hash on: [https://points.republicai.io](https://points.republicai.io)
 
 ---
 
