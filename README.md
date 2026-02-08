@@ -336,6 +336,24 @@ republicd tx bank send \
   --yes
 ```
 
+
+## 👤 Author
+
+* **Handle:** 0xDarkSeidBull
+* **Role:** Republic Validator
+* **GitHub:** [https://github.com/0xDarkSeidBull](https://github.com/0xDarkSeidBull)
+* **Wallet:** `0x3bc6348e1e569e97bd8247b093475a4ac22b9fd4`
+
+
+  
+## If this guide helped you:
+
+⭐ [![Stars](https://img.shields.io/github/stars/0xDarkSeidBull/republic-ai-validator)](https://github.com/0xDarkSeidBull/republic-ai-validator/stargazers)
+
+🧾 [![License](https://img.shields.io/github/license/0xDarkSeidBull/republic-ai-validator)](LICENSE)
+
+🔁 Share with new builders
+
 Submit TX hash on: [https://points.republicai.io](https://points.republicai.io)
 
 ---
