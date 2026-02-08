@@ -1,14 +1,4 @@
-Got it 👍
-Below is the **same guide rewritten in clean, professional English only** — no Hinglish, no slang.
-This is **final, stable, and safe to share publicly**.
-
----
-
 # 🚀 Republic AI Testnet Validator Setup Guide
-
-### ✅ FINAL • STABLE • ROOT-ONLY • NO STATE-SYNC • NO CRASH
-
----
 
 ## ⚠️ IMPORTANT — READ FIRST
 
@@ -34,7 +24,7 @@ If you do not run as root, you will face permission errors, systemd failures, or
 ### 🔴 RULE #2: FOLLOW STEPS IN ORDER
 
 * Do **not** skip steps
-* Do **not** run cleanup or systemctl commands unless instructed
+* Do **not** run cleanup or `systemctl` commands unless instructed
 * Configuration files are strict — mistakes will crash the node
 
 ---
@@ -53,6 +43,9 @@ If you do not run as root, you will face permission errors, systemd failures, or
 | Operating System        | Ubuntu 22.04 LTS             |
 | Recommended Hardware    | 8 CPU / 16GB RAM / 500GB SSD |
 
+> **Moniker rule:**
+> Replace `xyzguide` everywhere with your own validator moniker.
+
 ---
 
 ## 🔧 Why This Guide Is Stable (Read Once)
@@ -67,7 +60,7 @@ If you do not run as root, you will face permission errors, systemd failures, or
 
 > **State Sync Disabled → Normal P2P Sync Enabled**
 
-Normal P2P sync is slower, but **completely stable** and does not crash.
+Normal P2P sync is slower, but **fully stable** and does not crash.
 
 ---
 
@@ -102,16 +95,14 @@ republicd version
 ⚠️ This step **creates the `.republicd` directory**
 
 ```bash
-republicd init <your-moniker> --chain-id raitestnet_77701-1
+republicd init xyzguide --chain-id raitestnet_77701-1
 ```
-
-Replace `<your-moniker>` everywhere with your chosen validator name.
 
 ---
 
-## Step 3.1: Create `priv_validator_state.json` (MANDATORY)
+## Step 4: Create `priv_validator_state.json` (MANDATORY)
 
-🚨 This is the **most common cause of silent node crashes**.
+🚨 **Most common cause of silent node crashes**
 
 ```bash
 mkdir -p /root/.republicd/data
@@ -131,7 +122,7 @@ Without this file, the node may exit without any error message.
 
 ---
 
-## Step 4: Download Genesis File
+## Step 5: Download Genesis File
 
 ```bash
 curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json > /root/.republicd/config/genesis.json
@@ -139,9 +130,7 @@ curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genes
 
 ---
 
-## Step 5: Disable State Sync (FINAL)
-
-Edit the configuration:
+## Step 6: Disable State Sync (FINAL)
 
 ```bash
 nano /root/.republicd/config/config.toml
@@ -154,9 +143,11 @@ Set **exactly**:
 enable = false
 ```
 
+> Trust height / trust hash are **not required** when state sync is disabled.
+
 ---
 
-## Step 6: Add a Verified Persistent Peer
+## Step 7: Add a Verified Persistent Peer
 
 ```bash
 sed -i -E "s|persistent_peers *=.*|persistent_peers = \"6313f892ee50ca0b2d6cc6411ac5207dbf2d164b@95.216.102.220:13356\"|" \
@@ -165,7 +156,7 @@ sed -i -E "s|persistent_peers *=.*|persistent_peers = \"6313f892ee50ca0b2d6cc641
 
 ---
 
-## Step 7: Fix Mempool Crash (CRITICAL)
+## Step 8: Fix Mempool Crash (CRITICAL)
 
 Open the config file:
 
@@ -184,9 +175,9 @@ Empty values will prevent the node from starting.
 
 ---
 
-## Step 8: P2P Speed Configuration (NO DUPLICATES)
+## Step 9: P2P Speed Configuration (NO DUPLICATES)
 
-⚠️ `send_rate` and `recv_rate` must appear **only once**, inside `[p2p]`.
+⚠️ These keys must appear **only once**, inside `[p2p]`.
 
 ```toml
 [p2p]
@@ -199,7 +190,7 @@ Duplicate TOML keys will crash the node.
 
 ---
 
-## Step 9: Create Systemd Service
+## Step 10: Create Systemd Service
 
 ```bash
 nano /etc/systemd/system/republicd.service
@@ -243,7 +234,7 @@ journalctl -u republicd -f
 
 ---
 
-## Step 10: Optional Peer Reset (Recommended if Sync Slows)
+## Step 11: Optional Peer Reset (If Sync Slows)
 
 ```bash
 systemctl stop republicd
@@ -251,37 +242,33 @@ rm -f /root/.republicd/config/addrbook.json
 systemctl start republicd
 ```
 
-This removes dead peers and forces fresh peer discovery.
-
 ---
 
-## Step 11: Wait for Full Sync
+## Step 12: Wait for Full Sync
 
 ```bash
 republicd status | jq .sync_info
 ```
 
-Wait until:
+Proceed only when:
 
 ```json
 "catching_up": false
 ```
 
-Sync may be slow, but it will complete successfully.
-
 ---
 
-## Step 12: Create or Recover Wallet
+## Step 13: Create or Recover Wallet
 
 ```bash
-republicd keys add <your-moniker>
+republicd keys add xyzguide
 # OR
-republicd keys add <your-moniker> --recover
+republicd keys add xyzguide --recover
 ```
 
 ---
 
-## Step 13: Get Testnet Tokens
+## Step 14: Get Testnet Tokens
 
 Faucet:
 👉 [https://points.republicai.io/faucet](https://points.republicai.io/faucet)
@@ -290,42 +277,37 @@ Minimum required: **1.1+ RAI**
 
 ---
 
-## Step 14: Create Validator
+## Step 15: Create Validator
 
-Get validator pubkey:
+Get validator public key:
 
 ```bash
 republicd comet show-validator
 ```
 
-Create `validator.json` and submit the transaction as usual.
+Create `validator.json` and submit the transaction.
 
 ---
 
-
-## Step 13: Verify Validator Status
-
-Check your validator status:
+## Step 16: Verify Validator Status
 
 ```bash
 republicd query staking validator $(republicd keys show xyzguide --bech val -a)
 ```
 
-### Confirm the following fields:
+Confirm:
 
 * `status: BOND_STATUS_BONDED`
 * `jailed: false`
 
-You can also verify your validator on the explorer:
+Explorer:
 👉 [https://explorer.republicai.io](https://explorer.republicai.io)
 
 ---
 
-## Step 14: Link Validator to Republic AI Dashboard
+## Step 17: Link Validator to Republic AI Dashboard
 
-To link your validator with the Republic AI dashboard, send a **self-transfer transaction with a memo**.
-
-### Send memo transaction:
+Send a self-transfer with memo:
 
 ```bash
 republicd tx bank send \
@@ -341,13 +323,8 @@ republicd tx bank send \
   --yes
 ```
 
-🔹 Replace `YOUR_REFER_CODE` with your actual referral or dashboard code.
-
-### Final Step
-
-* Copy the **transaction hash**
-* Submit it on:
-  👉 [https://points.republicai.io](https://points.republicai.io)
+* Copy the transaction hash
+* Submit it on: 👉 [https://points.republicai.io](https://points.republicai.io)
 
 ---
 
@@ -356,16 +333,16 @@ republicd tx bank send \
 ### Check Sync Status
 
 ```bash
-republicd status | jq '.sync_info'
+republicd status | jq .sync_info
 ```
 
-### Restart the Node
+### Restart Node
 
 ```bash
-sudo systemctl restart republicd
+systemctl restart republicd
 ```
 
-### Unjail Validator (If Jailed)
+### Unjail Validator (If Needed)
 
 ```bash
 republicd tx slashing unjail \
@@ -379,10 +356,12 @@ republicd tx slashing unjail \
 
 ---
 
-### ✅ Final Notes
+## ✅ Final Notes
 
-* Always ensure the node is fully synced before creating or managing a validator
-* Do not unjail unless your node is **fully caught up**
+* Ensure the node is **fully synced** before validator actions
+* Do **not** unjail while catching up
 * Keep sufficient balance for gas fees
 
 
+
+Just tell me.
