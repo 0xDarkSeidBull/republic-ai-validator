@@ -227,13 +227,7 @@ trust_period = "168h0m0s"
 
 
 
-If you want next, I can:
 
-* Add a **one-command bash script** to auto-calculate these values
-* Explain **why choosing a recent height fails**
-* Add a **multi-RPC verification method**
-
-Just say the word 👊
 
 
 ## Step 6: Add a Working Persistent Peer (TESTED)
