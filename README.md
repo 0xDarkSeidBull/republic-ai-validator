@@ -101,7 +101,7 @@ republicd version
 ## Step 3: Initialize Node
 
 ```bash
-republicd init xyzguide --chain-id raitestnet_77701-1
+republicd init xyzguide --chain-id raitestnet_77701-1 --home /root/.republicd
 ```
 
 ---
