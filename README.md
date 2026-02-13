@@ -124,6 +124,12 @@ EOF
 
 ## Step 5: Download Genesis
 
+Manually create folder
+
+```bash
+mkdir -p /root/.republicd/config
+```
+
 ```bash
 curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
 > /root/.republicd/config/genesis.json
