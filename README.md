@@ -1,12 +1,10 @@
-# 🚀 Republic AI Testnet Validator Setup Guide (FINAL & COMPLETE)
+# 🚀 Republic AI Testnet Validator Setup Guide 
 
 ---
 
 ## ⚠️ IMPORTANT — READ FIRST
 
 ### 🔴 RULE #1: RUN EVERYTHING AS ROOT
-
-This entire guide **must be executed as the `root` user**.
 
 ```bash
 sudo -i
@@ -23,56 +21,58 @@ root
 
 ### 🔴 RULE #2: FOLLOW STEPS IN ORDER
 
-* Do **not** skip steps
-* Do **not** run cleanup or `systemctl` commands unless instructed
-* Configuration files are strict — mistakes will crash the node
+* Do NOT skip steps
+* Do NOT manually create config files unless told
+* Wrong config edits = instant node crash
+
+---
+
+## 🧠 CRITICAL PATH NOTE
+
+This binary uses default home:
+
+```
+/root/.republic
+```
+
+❌ NOT `.republicd`
+
+All paths below use `/root/.republic`.
 
 ---
 
 ## 📝 IMPORTANT NOTE ABOUT MONIKER
 
-Wherever `xyzguide` appears, **replace it with your own moniker / key name**.
-Use the **same moniker everywhere**:
+Replace `xyzguide` with your own moniker everywhere:
 
-* Node initialization
+* Node init
 * Wallet keys
 * Validator creation
 * Transactions
 
 ---
 
-## 📌 Network & System Information
+## 📌 Network & System Info
 
-| Item                    | Value                        |
-| ----------------------- | ---------------------------- |
-| Chain ID                | `raitestnet_77701-1`         |
-| Base Denom              | `arai`                       |
-| Display Denom           | `RAI`                        |
-| Decimals                | 18                           |
-| Minimum Gas Price       | `250000000arai`              |
-| Minimum Self-Delegation | `1 RAI`                      |
-| Top 100 Validators      | ~1000+ RAI                   |
-| OS                      | Ubuntu 22.04 LTS             |
-| Recommended Hardware    | 8 CPU / 16GB RAM / 500GB SSD |
+| Item                | Value                |
+| ------------------- | -------------------- |
+| Chain ID            | `raitestnet_77701-1` |
+| Base Denom          | `arai`               |
+| Min Gas Price       | `250000000arai`      |
+| Min Self Delegation | `1 RAI`              |
+| OS                  | Ubuntu 22.04         |
+| Hardware            | 8 CPU / 16GB RAM     |
 
 ---
 
-## 🔧 Stability Decision (Important)
+# 🔧 Stability Decision
 
-### ❌ Why State Sync Is Disabled
-
-* RPC endpoints are overloaded
-* Light client verification failures
-* Snapshot rejections and node crashes
-
-### ✅ Final Decision
-
-**State Sync Disabled → Normal P2P Sync Enabled**
-Slower sync, but **100% stable**.
+State Sync disabled → unstable RPC
+We use **normal P2P sync (stable)**
 
 ---
 
-## Step 1: Install Dependencies
+# Step 1: Install Dependencies
 
 ```bash
 apt update && apt upgrade -y
@@ -81,37 +81,46 @@ apt install -y curl jq nano build-essential git make wget screen
 
 ---
 
-## Step 2: Install `republicd` Binary
+# Step 2: Install republicd
 
 ```bash
 VERSION="v0.1.0"
-curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /tmp/republicd
-chmod +x /tmp/republicd
-mv /tmp/republicd /usr/local/bin/republicd
-```
-
-Verify:
-
-```bash
+curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /usr/local/bin/republicd
+chmod +x /usr/local/bin/republicd
 republicd version
 ```
 
 ---
 
-## Step 3: Initialize Node
+# Step 3: Initialize Node
 
 ```bash
-republicd init xyzguide --chain-id raitestnet_77701-1 --home /root/.republicd
+republicd init xyzguide --chain-id raitestnet_77701-1
+```
+
+Creates:
+
+```
+/root/.republic/config
+/root/.republic/data
 ```
 
 ---
 
-## Step 4: Create `priv_validator_state.json` (MANDATORY)
+# Step 4: Download Genesis
 
 ```bash
-mkdir -p /root/.republicd/data
+curl -L https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
+-o /root/.republic/config/genesis.json
+```
 
-cat <<EOF > /root/.republicd/data/priv_validator_state.json
+---
+
+# Step 5: Create Validator State (MANDATORY)
+
+```bash
+mkdir -p /root/.republic/data
+cat <<EOF > /root/.republic/data/priv_validator_state.json
 {
   "height": "0",
   "round": 0,
@@ -122,25 +131,10 @@ EOF
 
 ---
 
-## Step 5: Download Genesis
-
-Manually create folder
+# Step 6: Disable State Sync
 
 ```bash
-mkdir -p /root/.republicd/config
-```
-
-```bash
-curl -s https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
-> /root/.republicd/config/genesis.json
-```
-
----
-
-## Step 6: Disable State Sync
-
-```bash
-nano /root/.republicd/config/config.toml
+nano /root/.republic/config/config.toml
 ```
 
 Set:
@@ -152,18 +146,17 @@ enable = false
 
 ---
 
-## Step 7: Add Persistent Peer
+# Step 7: Add Persistent Peer
 
 ```bash
-sed -i -E "s|persistent_peers *=.*|persistent_peers = \"6313f892ee50ca0b2d6cc6411ac5207dbf2d164b@95.216.102.220:13356\"|" \
-/root/.republicd/config/config.toml
+sed -i -E 's|persistent_peers *=.*|persistent_peers = "6313f892ee50ca0b2d6cc6411ac5207dbf2d164b@95.216.102.220:13356"|' /root/.republic/config/config.toml
 ```
 
 ---
 
-## Step 8: Fix Mempool Crash (CRITICAL)
+# Step 8: Fix Mempool Crash (CRITICAL)
 
-Ensure these lines are **not empty**:
+Inside `config.toml` ensure EXACT integers (no quotes):
 
 ```toml
 experimental_max_gossip_connections_to_persistent_peers = 4
@@ -172,9 +165,9 @@ experimental_max_gossip_connections_to_non_persistent_peers = 4
 
 ---
 
-## Step 9: P2P Speed Configuration
+# Step 9: P2P Speed Config
 
-Ensure **no duplicate keys**:
+Ensure only ONE `[p2p]` section:
 
 ```toml
 [p2p]
@@ -184,7 +177,7 @@ recv_rate = 5120000
 
 ---
 
-## Step 10: Create Systemd Service
+# Step 10: Create Systemd Service
 
 ```bash
 nano /etc/systemd/system/republicd.service
@@ -200,7 +193,7 @@ User=root
 Environment=HOME=/root
 WorkingDirectory=/root
 ExecStart=/usr/local/bin/republicd start \
-  --home /root/.republicd \
+  --home /root/.republic \
   --chain-id raitestnet_77701-1
 Restart=always
 RestartSec=3
@@ -210,6 +203,8 @@ LimitNOFILE=65535
 WantedBy=multi-user.target
 ```
 
+Start node:
+
 ```bash
 systemctl daemon-reload
 systemctl enable republicd
@@ -218,13 +213,29 @@ systemctl start republicd
 
 ---
 
-## Step 11: Wait for Full Sync
+# 🔴 NEW: Monitor Live Logs (IMPORTANT)
+
+```bash
+journalctl -u republicd -f
+```
+
+You should see:
+
+```
+Starting Peer service
+Added peer
+Executed block
+```
+
+---
+
+# Step 11: Check Sync Status
 
 ```bash
 republicd status | jq .sync_info
 ```
 
-Proceed only when:
+Wait until:
 
 ```json
 "catching_up": false
@@ -232,36 +243,36 @@ Proceed only when:
 
 ---
 
-## Step 12: Create or Recover Wallet
+# Step 12: Create / Recover Wallet
 
 ```bash
 republicd keys add xyzguide
-# or
+# OR
 republicd keys add xyzguide --recover
 ```
 
 ---
 
-## Step 13: Get Testnet Tokens
+# Step 13: Get Faucet Tokens
 
 👉 [https://points.republicai.io/faucet](https://points.republicai.io/faucet)
 Minimum: **1.1+ RAI**
 
 ---
 
-## 🚀 Step 14: CREATE VALIDATOR (COMPLETE)
+# 🚀 Step 14: Create Validator
 
-### 1️⃣ Confirm Sync Status
+## Confirm Sync
 
 ```bash
 republicd status | jq .sync_info.catching_up
 ```
 
-Must return `false`.
+Must be `false`
 
 ---
 
-### 2️⃣ Get Validator PubKey
+## Get Validator PubKey
 
 ```bash
 republicd comet show-validator
@@ -269,7 +280,7 @@ republicd comet show-validator
 
 ---
 
-### 3️⃣ Create `validator.json`
+## Create validator.json
 
 ```bash
 nano validator.json
@@ -296,7 +307,7 @@ nano validator.json
 
 ---
 
-### 4️⃣ Send Create-Validator Transaction
+## Create Validator TX
 
 ```bash
 republicd tx staking create-validator validator.json \
@@ -310,7 +321,7 @@ republicd tx staking create-validator validator.json \
 
 ---
 
-## Step 15: Verify Validator
+# Step 15: Verify Validator
 
 ```bash
 republicd query staking validator \
@@ -319,14 +330,16 @@ $(republicd keys show xyzguide --bech val -a)
 
 Expected:
 
-* `BOND_STATUS_BONDED`
-* `jailed: false`
+```
+BOND_STATUS_BONDED
+jailed: false
+```
 
 Explorer: [https://explorer.republicai.io](https://explorer.republicai.io)
 
 ---
 
-## Step 16: Link Validator to Dashboard
+# Step 16: Link Validator to Dashboard
 
 ```bash
 republicd tx bank send \
@@ -341,18 +354,25 @@ republicd tx bank send \
   --gas-prices 250000000arai \
   --yes
 ```
-Submit TX hash on: [https://points.republicai.io](https://points.republicai.io)
 
+Submit TX hash:
+👉 [https://points.republicai.io](https://points.republicai.io)
+
+---
 
 ## 👤 Author
 
-* **Handle:** 0xDarkSeidBull
-* **Role:** Republic Validator
-* **GitHub:** [https://github.com/0xDarkSeidBull](https://github.com/0xDarkSeidBull)
-* **Wallet:** `0x3bc6348e1e569e97bd8247b093475a4ac22b9fd4`
+Handle: **0xDarkSeidBull**
+
+Role: Republic Validator
+
+GitHub: [https://github.com/0xDarkSeidBull](https://github.com/0xDarkSeidBull)
+
+Wallet: `0x3bc6348e1e569e97bd8247b093475a4ac22b9fd4`
+
+---
 
 
-  
 ## If this guide helped you:
 
 ⭐ [![Stars](https://img.shields.io/github/stars/0xDarkSeidBull/republic-ai-validator)](https://github.com/0xDarkSeidBull/republic-ai-validator/stargazers)
