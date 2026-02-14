@@ -361,6 +361,74 @@ Submit TX hash:
 ---
 
 ---
+## 🔑 OPTIONAL: Rotate Node Key (Generate New Peer ID)
+
+If running a fresh validator identity on the same synced node, rotate node key to generate a new peer ID.
+Chain data & sync will remain intact.
+
+> VPS IP cannot be changed. This only regenerates P2P identity.
+
+### 🔴 1. Show & Save Current Peer ID (copy to notepad)
+
+```bash
+echo "Current Peer ID:"
+republicd comet show-node-id --home /root/.republic
+```
+
+### 🔴 2. Stop Node
+
+```bash
+systemctl stop republicd
+```
+
+### 🔴 3. Backup Node Key
+
+```bash
+cp /root/.republic/config/node_key.json /root/node_key.backup.json
+```
+
+### 🔴 4. Remove Old Node Key
+
+```bash
+rm /root/.republic/config/node_key.json
+```
+
+### 🔴 5. Regenerate New Peer ID
+
+```bash
+systemctl start republicd
+sleep 5
+systemctl stop republicd
+systemctl start republicd
+```
+
+### 🔴 6. Verify New Peer ID (save again)
+
+```bash
+echo "New Peer ID:"
+republicd comet show-node-id --home /root/.republic
+```
+
+✔ Node remains synced
+✔ Chain data untouched
+✔ New peer identity generated
+
+---
+
+# 📋 ONE COMMAND: Dump Important IDs (Save to Notepad)
+
+This command prints wallet address, validator address, peer ID, and keeps private keys **local only** (not uploading anywhere).
+User can copy & save manually.
+
+```bash
+echo "===== NODE & WALLET INFO =====" && \
+echo "Wallet Address:" && republicd keys show xyzguide -a && \
+echo "Validator Address:" && republicd keys show xyzguide --bech val -a && \
+echo "Peer ID:" && republicd comet show-node-id --home /root/.republic && \
+echo "Node Moniker:" && grep -i moniker /root/.republic/config/config.toml
+```
+
+> ⚠️ Never share private keys publicly. Save them securely offline.
 
 ## ♻️ OPTIONAL: Run Another Validator (Keep Node Synced)
 
