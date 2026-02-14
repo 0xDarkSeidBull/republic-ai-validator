@@ -360,6 +360,77 @@ Submit TX hash:
 
 ---
 
+---
+
+## ♻️ OPTIONAL: Run Another Validator (Keep Node Synced)
+
+If you want to run a new validator on the same synced node, follow these safe steps.
+This will change only the validator identity — chain data & sync will remain intact.
+
+### 🔴 1. Stop Node
+
+```bash
+systemctl stop republicd
+```
+
+### 🔴 2. Backup Old Validator Key (IMPORTANT)
+
+```bash
+cp /root/.republic/config/priv_validator_key.json /root/old_priv_validator_key.json.bak
+```
+
+### 🔴 3. Remove Old Validator Key
+
+```bash
+rm /root/.republic/config/priv_validator_key.json
+```
+
+### 🔴 4. Generate New Validator Key (without deleting data)
+
+```bash
+republicd comet show-validator --home /root/.republic 2>/dev/null || true
+```
+
+Then start node once to auto-create new key:
+
+```bash
+systemctl start republicd
+sleep 5
+systemctl stop republicd
+```
+
+(New `priv_validator_key.json` will be created automatically)
+
+### 🔴 5. Start Node Again
+
+```bash
+systemctl start republicd
+journalctl -u republicd -f
+```
+
+### 🔴 6. Confirm Sync Still OK
+
+```bash
+republicd status | jq .sync_info.catching_up
+```
+
+✔ Must be `false`
+
+### 🔴 7. Get New PubKey
+
+```bash
+republicd comet show-validator
+```
+
+### 🔴 8. Create New Validator TX
+
+Use the new pubkey inside `validator.json` and run the create-validator transaction again.
+
+✔ Node will remain fully synced
+✔ Only validator identity will change
+
+
+
 ## 👤 Author
 
 Handle: **0xDarkSeidBull**
