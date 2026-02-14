@@ -315,7 +315,7 @@ republicd tx staking create-validator validator.json \
   --chain-id raitestnet_77701-1 \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 250000000arai \
+  --gas-prices 1000000000arai \
   --yes
 ```
 
@@ -351,7 +351,7 @@ republicd tx bank send \
   --note "YOUR_REF_CODE" \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 250000000arai \
+  --gas-prices 1000000000arai \
   --yes
 ```
 
@@ -447,6 +447,10 @@ systemctl stop republicd
 cp /root/.republic/config/priv_validator_key.json /root/old_priv_validator_key.json.bak
 ```
 
+```bash
+cat /root/.republic/config/priv_validator_key.json
+```
+
 ### 🔴 3. Remove Old Validator Key
 
 ```bash
@@ -455,16 +459,16 @@ rm /root/.republic/config/priv_validator_key.json
 
 ### 🔴 4. Generate New Validator Key (without deleting data)
 
-```bash
-republicd comet show-validator --home /root/.republic 2>/dev/null || true
-```
+
 
 Then start node once to auto-create new key:
 
 ```bash
 systemctl start republicd
-sleep 5
-systemctl stop republicd
+```
+
+```bash
+republicd comet show-validator --home /root/.republic 2>/dev/null || true
 ```
 
 (New `priv_validator_key.json` will be created automatically)
