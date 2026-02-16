@@ -92,7 +92,9 @@ chmod +x republicd
 ```
 
 Confirm version:
-```republicd version
+
+```bash
+republicd version
 ```
 
 ---
