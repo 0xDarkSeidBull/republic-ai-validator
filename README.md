@@ -84,10 +84,15 @@ apt install -y curl jq nano build-essential git make wget screen
 # Step 2: Install republicd
 
 ```bash
-VERSION="v0.1.0"
-curl -L "https://media.githubusercontent.com/media/RepublicAI/networks/main/testnet/releases/${VERSION}/republicd-linux-amd64" -o /usr/local/bin/republicd
-chmod +x /usr/local/bin/republicd
-republicd version
+VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
+curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-${ARCH}" -o republicd
+chmod +x republicd
+```
+
+Confirm version:
+```republicd version
 ```
 
 ---
@@ -359,6 +364,77 @@ Submit TX hash:
 👉 [https://points.republicai.io](https://points.republicai.io)
 
 ---
+
+
+## v0.3.0 upgrade command
+
+
+**Step 1: Stop the node**
+
+If using systemd:
+```sudo systemctl stop republicd```
+
+If running manually:
+```pkill republicd```
+
+Confirm stopped:
+```ps aux | grep republicd```
+
+**Step 2: Download Latest Version**
+
+To auto-get latest release:
+```
+VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
+ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
+
+curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-${ARCH}" -o republicd
+chmod +x republicd
+```
+
+OR if you specifically want v0.3.0:
+``` curl -L https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -o republicd
+chmod +x republicd
+```
+
+**Step3: Replace Old Binary**
+
+Backup old binary first (important):
+```sudo mv /usr/local/bin/republicd /usr/local/bin/republicd_backup
+```
+
+Move new one:
+```
+sudo mv republicd /usr/local/bin/republicd
+```
+Confirm version:
+```republicd version
+```
+
+**Step4: Start Node Again**
+If using systemd:
+```sudo systemctl start republicd
+```
+
+If manual:
+```republicd start --home $HOME/.republic --chain-id raitestnet_77701-1
+```
+
+**Step5: Check Status**
+```republicd status | jq .sync_info
+```
+OR
+```journalctl -u republicd -f
+```
+
+
+
+
+
+
+
+
+
+
 
 ---
 ## 🔑 OPTIONAL: Rotate Node Key (Generate New Peer ID)
