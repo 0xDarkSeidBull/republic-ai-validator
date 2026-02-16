@@ -372,18 +372,28 @@ Submit TX hash:
 **Step 1: Stop the node**
 
 If using systemd:
-```sudo systemctl stop republicd```
+
+```bash
+sudo systemctl stop republicd
+```
 
 If running manually:
-```pkill republicd```
+
+```bash
+pkill republicd
+```
 
 Confirm stopped:
-```ps aux | grep republicd```
+
+```bash
+ps aux | grep republicd
+```
 
 **Step 2: Download Latest Version**
 
 To auto-get latest release:
-```
+
+```bash
 VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
 ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
 
@@ -392,48 +402,55 @@ chmod +x republicd
 ```
 
 OR if you specifically want v0.3.0:
-``` curl -L https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -o republicd
+```bash
+curl -L https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -o republicd
 chmod +x republicd
 ```
 
 **Step3: Replace Old Binary**
 
 Backup old binary first (important):
-```sudo mv /usr/local/bin/republicd /usr/local/bin/republicd_backup
+
+```bash
+sudo mv /usr/local/bin/republicd /usr/local/bin/republicd_backup
 ```
 
 Move new one:
-```
+
+```bash
 sudo mv republicd /usr/local/bin/republicd
 ```
+
 Confirm version:
-```republicd version
+
+```bash
+republicd version
 ```
 
 **Step4: Start Node Again**
+
 If using systemd:
-```sudo systemctl start republicd
+
+```bash
+sudo systemctl start republicd
 ```
 
 If manual:
-```republicd start --home $HOME/.republic --chain-id raitestnet_77701-1
+
+```bash
+republicd start --home $HOME/.republic --chain-id raitestnet_77701-1
 ```
 
 **Step5: Check Status**
-```republicd status | jq .sync_info
+
+```bash
+republicd status | jq .sync_info
 ```
+
 OR
+
 ```journalctl -u republicd -f
 ```
-
-
-
-
-
-
-
-
-
 
 
 ---
