@@ -1,17 +1,29 @@
-# 🚀 Republic AI Testnet Validator Setup Guide 
+Below is the **clean, fixed, production-ready guide**
+(Working method: **v0.1.0 → sync → upgrade to v0.2.1 → upgrade to v0.3.0**) 🚀
 
 ---
 
-## ⚠️ IMPORTANT — READ FIRST
+# 🚀 Republic AI Testnet Validator Setup (Stable Method)
 
-### 🔴 RULE #1: RUN EVERYTHING AS ROOT
+⚠️ This guide fixes:
+
+* peer reconnecting issue
+* RPC timeouts
+* fresh v0.3.0 sync failure
+
+✔ Proven working flow:
+**Install v0.1.0 → Sync → Upgrade to v0.2.1 → Upgrade to v0.3.0**
+
+---
+
+# 🔴 STEP 0 — Run as root
 
 ```bash
 sudo -i
 whoami
 ```
 
-✔ Output must be:
+Output must be:
 
 ```
 root
@@ -19,106 +31,72 @@ root
 
 ---
 
-### 🔴 RULE #2: FOLLOW STEPS IN ORDER
-
-* Do NOT skip steps
-* Do NOT manually create config files unless told
-* Wrong config edits = instant node crash
-
----
-
-## 🧠 CRITICAL PATH NOTE
-
-This binary uses default home:
-
-```
-/root/.republic
-```
-
-❌ NOT `.republicd`
-
-All paths below use `/root/.republic`.
-
----
-
-## 📝 IMPORTANT NOTE ABOUT MONIKER
-
-Replace `xyzguide` with your own moniker everywhere:
-
-* Node init
-* Wallet keys
-* Validator creation
-* Transactions
-
----
-
-## 📌 Network & System Info
-
-| Item                | Value                |
-| ------------------- | -------------------- |
-| Chain ID            | `raitestnet_77701-1` |
-| Base Denom          | `arai`               |
-| Min Gas Price       | `250000000arai`      |
-| Min Self Delegation | `1 RAI`              |
-| OS                  | Ubuntu 22.04         |
-| Hardware            | 8 CPU / 16GB RAM     |
-
----
-
-# 🔧 Stability Decision
-
-State Sync disabled → unstable RPC
-We use **normal P2P sync (stable)**
-
----
-
-# Step 1: Install Dependencies
+# 🧹 STEP 1 — Clean Previous Installation (Fresh Start)
 
 ```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install curl tar wget clang pkg-config libssl-dev jq build-essential bsdmainutils git make ncdu gcc chrony liblz4-tool -y
+sudo systemctl stop republicd 2>/dev/null || true
+pkill republicd 2>/dev/null || true
+rm -rf $HOME/.republic
+sudo rm -f /usr/local/bin/republicd
 ```
 
 ---
 
-# Step 2: Install republicd
+# 📦 STEP 2 — Install Dependencies
 
 ```bash
-wget https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -O republicd
+apt update && apt upgrade -y
+apt install curl tar wget clang pkg-config libssl-dev jq build-essential bsdmainutils git make ncdu gcc chrony liblz4-tool -y
+```
+
+---
+
+# 🔽 STEP 3 — Install republicd v0.1.0 (IMPORTANT)
+
+```bash
+cd $HOME
+wget https://github.com/RepublicAI/networks/releases/download/v0.1.0/republicd-linux-amd64 -O republicd
 chmod +x republicd
-sudo mv republicd /usr/local/bin/
+mv republicd /usr/local/bin/republicd
+```
+
+Check version:
+
+```bash
 republicd version
 ```
 
-Expected::
+Expected:
 
-```bash
-v0.3.0
+```
+v0.1.0
 ```
 
 ---
 
-# Step 3: Initialize Node
+# 🏁 STEP 4 — Initialize Node
 
 ```bash
-republicd init xyzguide --chain-id raitestnet_77701-1
+republicd init my-node --chain-id raitestnet_77701-1
 ```
 
+---
 
-
-# Step 4: Download Genesis
+# 🌐 STEP 5 — Download Genesis
 
 ```bash
 curl -L https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json -o $HOME/.republic/config/genesis.json
 ```
 
+Verify:
 
 ```bash
 jq . $HOME/.republic/config/genesis.json | head
 ```
+
 ---
 
-# Step  5. Set Working Dynamic Peers (Most Important Fix)
+# 🔗 STEP 6 — Add Dynamic Working Peers (CRITICAL FIX)
 
 ```bash
 peers=$(curl -sS https://rpc-t.republic.vinjan-inc.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.remote_ip):\(.node_info.listen_addr)"' | awk -F ':' '{print $1":"$(NF)}' | paste -sd "," -)
@@ -126,7 +104,7 @@ peers=$(curl -sS https://rpc-t.republic.vinjan-inc.com/net_info | jq -r '.result
 sed -i "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.republic/config/config.toml
 ```
 
-Check
+Check:
 
 ```bash
 grep persistent_peers $HOME/.republic/config/config.toml
@@ -134,19 +112,16 @@ grep persistent_peers $HOME/.republic/config/config.toml
 
 ---
 
-# Step 6. Disable State Sync (normal sync mode)
-
+# ❌ STEP 7 — Disable State Sync (Use Stable P2P Sync)
 
 ```bash
 sed -i 's/^enable *=.*/enable = false/' $HOME/.republic/config/config.toml
 sed -i 's/^seeds *=.*/seeds = ""/' $HOME/.republic/config/config.toml
 ```
 
-
-
 ---
 
-# Step 7. Start Node (Foreground Test)
+# ▶️ STEP 8 — Start Node (Foreground Test)
 
 ```bash
 republicd start --chain-id raitestnet_77701-1
@@ -154,27 +129,23 @@ republicd start --chain-id raitestnet_77701-1
 
 You should see:
 
-```bash
+```
 Ensure peers...
-Reconnecting to peer...
+Added peer...
 ```
 
+Stop after confirming:
 
-
----
-
-# Step 9 Stop Node (After Confirming Sync Works)
-
-(This stops foreground process only)
+```
+CTRL + C
+```
 
 ---
 
-# Step 10Run Node as Background Service (Permanent)
+# ⚙️ STEP 9 — Create Systemd Service
 
-
-Create systemd service
 ```bash
-sudo tee /etc/systemd/system/republicd.service > /dev/null <<EOF
+tee /etc/systemd/system/republicd.service > /dev/null <<EOF
 [Unit]
 Description=Republic Protocol Node
 After=network-online.target
@@ -192,36 +163,28 @@ WantedBy=multi-user.target
 EOF
 ```
 
-Enable + Start Service
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable republicd
-sudo systemctl start republicd
-```
-
 ---
 
-# 🔴 View Live Logs (Safe CTRL+C)
+# 🚀 STEP 10 — Start Service
+
+```bash
+systemctl daemon-reload
+systemctl enable republicd
+systemctl start republicd
+```
+
+Logs:
 
 ```bash
 journalctl -u republicd -f -o cat
 ```
 
-You should see:
-
-```
-Starting Peer service
-Added peer
-Executed block
-```
-
 ---
 
-# Step 11: Check Sync Status
+# 📊 STEP 11 — Check Sync Progress
 
 ```bash
-republicd status | jq .sync_info
+republicd status | jq '.sync_info'
 ```
 
 Wait until:
@@ -232,26 +195,53 @@ Wait until:
 
 ---
 
-# Step 12: Create / Recover Wallet
+# 🔄 STEP 12 — Upgrade to v0.2.1 (After Sync Starts)
 
 ```bash
-republicd keys add xyzguide
-# OR
-republicd keys add xyzguide --recover
+cd $HOME
+wget https://github.com/RepublicAI/networks/releases/download/v0.2.1/republicd-linux-amd64 -O republicd
+chmod +x republicd
+
+systemctl stop republicd
+mv republicd /usr/local/bin/republicd
+systemctl restart republicd
+```
+
+Check logs:
+
+```bash
+journalctl -u republicd -f -o cat
 ```
 
 ---
 
-# Step 13: Get Faucet Tokens
+# 🔼 STEP 13 — Upgrade to v0.3.0 (Final Version)
 
-👉 [https://points.republicai.io/faucet](https://points.republicai.io/faucet)
-Minimum: **1.1+ RAI**
+```bash
+cd $HOME
+wget https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -O republicd
+chmod +x republicd
+
+systemctl stop republicd
+mv republicd /usr/local/bin/republicd
+systemctl restart republicd
+```
+
+Verify:
+
+```bash
+republicd version
+```
+
+Expected:
+
+```
+v0.3.0
+```
 
 ---
 
-# 🚀 Step 14: Create Validator
-
-## Confirm Sync
+# 📈 STEP 14 — Final Sync Check
 
 ```bash
 republicd status | jq '.sync_info'
@@ -259,7 +249,27 @@ republicd status | jq '.sync_info'
 
 Must be `false`
 
+
+
+# 🔐 NEXT STEPS (After Sync)
+
+Create wallet:
+
+```bash
+republicd keys add my-node
+```
+
+Recover wallet:
+
+```bash
+republicd keys add my-node --recover
+```
+
+Create validator after full sync.
+
 ---
+
+
 
 ## Get Validator PubKey
 
@@ -349,95 +359,6 @@ Submit TX hash:
 
 ---
 
-
-## v0.3.0 upgrade command
-
-
-**Step 1: Stop the node**
-
-If using systemd:
-
-```bash
-sudo systemctl stop republicd
-```
-
-If running manually:
-
-```bash
-pkill republicd
-```
-
-Confirm stopped:
-
-```bash
-ps aux | grep republicd
-```
-
-**Step 2: Download Latest Version**
-
-To auto-get latest release:
-
-```bash
-VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
-ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
-
-curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-${ARCH}" -o republicd
-chmod +x republicd
-```
-
-OR if you specifically want v0.3.0:
-```bash
-curl -L https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -o republicd
-chmod +x republicd
-```
-
-**Step3: Replace Old Binary**
-
-Backup old binary first (important):
-
-```bash
-sudo mv /usr/local/bin/republicd /usr/local/bin/republicd_backup
-```
-
-Move new one:
-
-```bash
-sudo mv republicd /usr/local/bin/republicd
-```
-
-Confirm version:
-
-```bash
-republicd version
-```
-
-**Step4: Start Node Again**
-
-If using systemd:
-
-```bash
-sudo systemctl start republicd
-```
-
-If manual:
-
-```bash
-republicd start --home $HOME/.republic --chain-id raitestnet_77701-1
-```
-
-**Step5: Check Status**
-
-```bash
-republicd status | jq .sync_info
-```
-
-OR
-
-```journalctl -u republicd -f
-```
-
-
----
 ## 🔑 OPTIONAL: Rotate Node Key (Generate New Peer ID)
 
 If running a fresh validator identity on the same synced node, rotate node key to generate a new peer ID.
