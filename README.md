@@ -75,8 +75,8 @@ We use **normal P2P sync (stable)**
 # Step 1: Install Dependencies
 
 ```bash
-apt update && apt upgrade -y
-apt install -y curl jq nano build-essential git make wget screen
+sudo apt update && sudo apt upgrade -y
+sudo apt install curl tar wget clang pkg-config libssl-dev jq build-essential bsdmainutils git make ncdu gcc chrony liblz4-tool -y
 ```
 
 ---
@@ -84,17 +84,16 @@ apt install -y curl jq nano build-essential git make wget screen
 # Step 2: Install republicd
 
 ```bash
-VERSION=$(curl -s https://api.github.com/repos/RepublicAI/networks/releases/latest | jq -r .tag_name)
-ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')
-
-curl -L "https://github.com/RepublicAI/networks/releases/download/${VERSION}/republicd-linux-${ARCH}" -o republicd
+wget https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -O republicd
 chmod +x republicd
+sudo mv republicd /usr/local/bin/
+republicd version
 ```
 
-Confirm version:
+Expected::
 
 ```bash
-republicd version
+v0.3.0
 ```
 
 ---
@@ -105,125 +104,108 @@ republicd version
 republicd init xyzguide --chain-id raitestnet_77701-1
 ```
 
-Creates:
 
-```
-/root/.republic/config
-/root/.republic/data
-```
-
----
 
 # Step 4: Download Genesis
 
 ```bash
-curl -L https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json \
--o /root/.republic/config/genesis.json
+curl -L https://raw.githubusercontent.com/RepublicAI/networks/main/testnet/genesis.json -o $HOME/.republic/config/genesis.json
 ```
 
----
-
-# Step 5: Create Validator State (MANDATORY)
 
 ```bash
-mkdir -p /root/.republic/data
-cat <<EOF > /root/.republic/data/priv_validator_state.json
-{
-  "height": "0",
-  "round": 0,
-  "step": 0
-}
-EOF
+jq . $HOME/.republic/config/genesis.json | head
 ```
-
 ---
 
-# Step 6: Disable State Sync
+# Step  5. Set Working Dynamic Peers (Most Important Fix)
 
 ```bash
-nano /root/.republic/config/config.toml
+peers=$(curl -sS https://rpc-t.republic.vinjan-inc.com/net_info | jq -r '.result.peers[] | "\(.node_info.id)@\(.remote_ip):\(.node_info.listen_addr)"' | awk -F ':' '{print $1":"$(NF)}' | paste -sd "," -)
+
+sed -i "s/^persistent_peers *=.*/persistent_peers = \"$peers\"/" $HOME/.republic/config/config.toml
 ```
 
-Set:
-
-```toml
-[statesync]
-enable = false
-```
-
----
-
-# Step 7: Add Persistent Peer
+Check
 
 ```bash
-sed -i -E 's|persistent_peers *=.*|persistent_peers = "6313f892ee50ca0b2d6cc6411ac5207dbf2d164b@95.216.102.220:13356"|' /root/.republic/config/config.toml
+grep persistent_peers $HOME/.republic/config/config.toml
 ```
 
 ---
 
-# Step 8: Fix Mempool Crash (CRITICAL)
+# Step 6. Disable State Sync (normal sync mode)
 
-Inside `config.toml` ensure EXACT integers (no quotes):
-
-```toml
-experimental_max_gossip_connections_to_persistent_peers = 4
-experimental_max_gossip_connections_to_non_persistent_peers = 4
-```
-
----
-
-# Step 9: P2P Speed Config
-
-Ensure only ONE `[p2p]` section:
-
-```toml
-[p2p]
-send_rate = 5120000
-recv_rate = 5120000
-```
-
----
-
-# Step 10: Create Systemd Service
 
 ```bash
-nano /etc/systemd/system/republicd.service
+sed -i 's/^enable *=.*/enable = false/' $HOME/.republic/config/config.toml
+sed -i 's/^seeds *=.*/seeds = ""/' $HOME/.republic/config/config.toml
 ```
 
-```ini
+
+
+---
+
+# Step 7. Start Node (Foreground Test)
+
+```bash
+republicd start --chain-id raitestnet_77701-1
+```
+
+You should see:
+
+```bash
+Ensure peers...
+Reconnecting to peer...
+```
+
+
+
+---
+
+# Step 9 Stop Node (After Confirming Sync Works)
+
+(This stops foreground process only)
+
+---
+
+# Step 10Run Node as Background Service (Permanent)
+
+
+Create systemd service
+```bash
+sudo tee /etc/systemd/system/republicd.service > /dev/null <<EOF
 [Unit]
-Description=Republic AI Testnet Node
+Description=Republic Protocol Node
 After=network-online.target
 
 [Service]
 User=root
-Environment=HOME=/root
 WorkingDirectory=/root
-ExecStart=/usr/local/bin/republicd start \
-  --home /root/.republic \
-  --chain-id raitestnet_77701-1
+ExecStart=/usr/local/bin/republicd start --chain-id raitestnet_77701-1
 Restart=always
-RestartSec=3
+RestartSec=5
 LimitNOFILE=65535
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
-Start node:
+Enable + Start Service
 
 ```bash
-systemctl daemon-reload
-systemctl enable republicd
-systemctl start republicd
+sudo systemctl daemon-reload
+sudo systemctl enable republicd
+sudo systemctl start republicd
 ```
 
 ---
 
-# 🔴 NEW: Monitor Live Logs (IMPORTANT)
+# 🔴 View Live Logs (Safe CTRL+C)
 
 ```bash
-journalctl -u republicd -f
+journalctl -u republicd -f -o cat
 ```
 
 You should see:
