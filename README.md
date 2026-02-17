@@ -184,9 +184,7 @@ republicd status | jq '.sync_info'
 
 Wait until:
 
-```json
-"catching_up": false
-```
+Must be `150k-200k height` then upgrade to v0.2.1
 
 ---
 
@@ -204,9 +202,11 @@ systemctl restart republicd
 
 Check logs:
 
-```bash
-journalctl -u republicd -f -o cat
-```
+Wait until:
+
+Must be `326250 height` then upgrade to v0.3.0
+
+---
 
 ---
 
