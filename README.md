@@ -196,6 +196,8 @@ sudo systemctl stop republicd
 wget https://github.com/RepublicAI/networks/releases/download/v0.2.1/republicd-linux-amd64 -O republicd
 chmod +x republicd
 sudo mv republicd /usr/local/bin/republicd
+systemctl start republicd
+
 ```
 
 Check logs:
@@ -220,6 +222,7 @@ sudo systemctl stop republicd
 wget https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -O republicd
 chmod +x republicd
 sudo mv republicd /usr/local/bin/republicd
+systemctl start republicd
 
 republicd version
 ```
