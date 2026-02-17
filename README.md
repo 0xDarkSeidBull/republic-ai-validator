@@ -254,7 +254,7 @@ Minimum: **1.1+ RAI**
 ## Confirm Sync
 
 ```bash
-republicd status | jq .sync_info.catching_up
+republicd status | jq '.sync_info'
 ```
 
 Must be `false`
