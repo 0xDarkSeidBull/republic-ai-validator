@@ -191,48 +191,43 @@ Must be `150k-200k height` then upgrade to v0.2.1
 # 🔄 STEP 12 — Upgrade to v0.2.1 (After Sync Starts)
 
 ```bash
-cd $HOME
+sudo systemctl stop republicd
+
 wget https://github.com/RepublicAI/networks/releases/download/v0.2.1/republicd-linux-amd64 -O republicd
 chmod +x republicd
-
-systemctl stop republicd
-mv republicd /usr/local/bin/republicd
-systemctl restart republicd
+sudo mv republicd /usr/local/bin/republicd
 ```
 
 Check logs:
+
+```bash
+journalctl -u republicd -f -o cat
+```
 
 Wait until:
 
 Must be `326250 height` then upgrade to v0.3.0
 
----
+
 
 ---
 
 # 🔼 STEP 13 — Upgrade to v0.3.0 (Final Version)
 
 ```bash
-cd $HOME
+sudo systemctl stop republicd
+
 wget https://github.com/RepublicAI/networks/releases/download/v0.3.0/republicd-linux-amd64 -O republicd
 chmod +x republicd
+sudo mv republicd /usr/local/bin/republicd
 
-systemctl stop republicd
-mv republicd /usr/local/bin/republicd
-systemctl restart republicd
-```
-
-Verify:
-
-```bash
 republicd version
 ```
 
-Expected:
 
-```
-v0.3.0
-```
+Must be `v0.3.0`
+
+
 
 ---
 
