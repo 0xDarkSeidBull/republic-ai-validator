@@ -1,8 +1,3 @@
-Below is the **clean, fixed, production-ready guide**
-(Working method: **v0.1.0 → sync → upgrade to v0.2.1 → upgrade to v0.3.0**) 🚀
-
----
-
 # 🚀 Republic AI Testnet Validator Setup (Stable Method)
 
 ⚠️ This guide fixes:
