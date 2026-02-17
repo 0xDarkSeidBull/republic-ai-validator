@@ -282,14 +282,14 @@ nano validator.json
     "key": "PASTE_YOUR_PUBKEY_HERE"
   },
   "amount": "1000000000000000000arai",
-  "moniker": "xyzguide",
+  "moniker": "dirtydark",
   "identity": "",
   "website": "",
   "security_contact": "",
-  "details": "Republic AI Testnet Validator",
-  "commission-rate": "0.10",
-  "commission-max-rate": "0.20",
-  "commission-max-change-rate": "0.01",
+  "details": "dirtdark",
+  "commission-rate": "0.999",
+  "commission-max-rate": "1.000",
+  "commission-max-change-rate": "0.999",
   "min-self-delegation": "1"
 }
 ```
@@ -298,13 +298,15 @@ nano validator.json
 
 ## Create Validator TX
 
+NOTE `YOU NEED 9-10 RAI as GAS FEES`
+
 ```bash
 republicd tx staking create-validator validator.json \
   --from xyzguide \
   --chain-id raitestnet_77701-1 \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 1000000000arai \
+  --gas-prices 160000000000000arai  \
   --yes
 ```
 
@@ -340,7 +342,7 @@ republicd tx bank send \
   --note "YOUR_REF_CODE" \
   --gas auto \
   --gas-adjustment 1.5 \
-  --gas-prices 1000000000arai \
+  --gas-prices 160000000000000arai  \
   --yes
 ```
 
@@ -348,6 +350,159 @@ Submit TX hash:
 👉 [https://points.republicai.io](https://points.republicai.io)
 
 ---
+
+
+
+
+# 🧾 Republic Wallet Commands Guide
+
+## 1️⃣ List All Wallets
+
+```bash
+republicd keys list
+```
+
+---
+
+# 🔐 Wallet Management
+
+## 2️⃣ Create New Wallet
+
+```bash
+republicd keys add xyzguide
+```
+
+⚠️ Save the mnemonic safely (very important).
+
+---
+
+## 3️⃣ Import Wallet (from mnemonic)
+
+```bash
+republicd keys add xyzguide --recover
+```
+
+---
+
+## 4️⃣ Show Wallet Address
+
+```bash
+republicd keys show xyzguide -a
+```
+
+---
+
+## 5️⃣ Show Wallet Pubkey
+
+```bash
+republicd keys show xyzguide --pubkey
+```
+
+---
+
+# 💰 Balance & Transactions
+
+## 6️⃣ Check Wallet Balance
+
+```bash
+republicd q bank balances WALLET_ADDRESS
+```
+
+Example:
+
+```bash
+republicd q bank balances rai1xxxxxxxxxxxxxxxxxxxx
+```
+
+---
+
+## 7️⃣ Send Tokens (RAI Transfer)
+
+### Conversion Rule:
+
+```
+1 RAI = 1000000000000000000arai
+```
+
+### Send Command:
+
+```bash
+republicd tx bank send xyzguide RECEIVER_ADDRESS AMOUNTarai \
+  --chain-id raitestnet_77701-1 \
+  --gas=160000 \
+  --fees=200000000000000arai -y
+```
+
+### Example: Send 20 RAI
+
+```bash
+republicd tx bank send xyzguide rai1v0tuyrzvcdmw7pqvgce7gd905ge80l09r3engs 20000000000000000000arai \
+  --chain-id raitestnet_77701-1 \
+  --gas=160000 \
+  --fees=200000000000000arai -y
+```
+
+---
+
+# 🔎 Transaction Commands
+
+## 8️⃣ Check Transaction Status
+
+```bash
+republicd q tx TX_HASH
+```
+
+Example:
+
+```bash
+republicd q tx 0CCED982BB908573C129BCB949D9B2B16B4B75E6C9967D4BBB3148DE5FC00CBC
+```
+
+---
+
+# 🗑️ Delete Wallet (remove key from VPS)
+
+```bash
+republicd keys delete xyzguide
+```
+
+Force delete:
+
+```bash
+republicd keys delete xyzguide -y
+```
+
+⚠️ This only deletes the local key, funds remain safe on-chain.
+
+---
+
+# 🧠 Useful Extra Commands
+
+## 9️⃣ Check Chain ID
+
+```bash
+republicd status | jq -r .NodeInfo.network
+```
+
+---
+
+## 🔟 Show Validator Pubkey
+
+```bash
+republicd tendermint show-validator
+```
+
+---
+
+## 1️⃣1️⃣ Show Node Peer ID
+
+```bash
+republicd comet show-node-id --home /root/.republic
+```
+
+---
+
+
 
 ## 🔑 OPTIONAL: Rotate Node Key (Generate New Peer ID)
 
